@@ -18,6 +18,7 @@ import {
   ScheduleBadge,
 } from '@/components/badges'
 import Alerts from '@/components/Alerts'
+import { calculateSubEventProgress } from '@/lib/mega-events'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,36 +31,57 @@ export default async function StudentPage({
   if (!user || user.role !== 'STUDENT') redirect('/login?next=/student')
 
   const now = new Date()
-  const [registrations, memberships, invitations, tasks] = await Promise.all([
-    db.registration.findMany({
-      where: { studentId: user.id },
-      include: {
-        event: {
-          include: { society: { select: { name: true } } },
+  const [registrations, memberships, invitations, tasks, supervisedSubEvents] =
+    await Promise.all([
+      db.registration.findMany({
+        where: { studentId: user.id },
+        include: {
+          event: {
+            include: { society: { select: { name: true } } },
+          },
         },
-      },
-      orderBy: { updatedAt: 'desc' },
-    }),
-    db.membership.findMany({
-      where: { studentId: user.id },
-      include: { society: { select: { name: true, id: true } } },
-      orderBy: { updatedAt: 'desc' },
-    }),
-    db.invitation.findMany({
-      where: { studentId: user.id },
-      include: {
-        event: {
-          include: { society: { select: { name: true } } },
+        orderBy: { updatedAt: 'desc' },
+      }),
+      db.membership.findMany({
+        where: { studentId: user.id },
+        include: { society: { select: { name: true, id: true } } },
+        orderBy: { updatedAt: 'desc' },
+      }),
+      db.invitation.findMany({
+        where: { studentId: user.id },
+        include: {
+          event: {
+            include: { society: { select: { name: true } } },
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
-    db.task.findMany({
-      where: { assigneeId: user.id },
-      include: { event: { select: { title: true, id: true } } },
-      orderBy: { dueDate: 'asc' },
-    }),
-  ])
+        orderBy: { createdAt: 'desc' },
+      }),
+      db.task.findMany({
+        where: { assigneeId: user.id },
+        include: {
+          event: { select: { title: true, id: true } },
+          subEvent: {
+            select: {
+              title: true,
+              id: true,
+              megaEvent: { select: { title: true, id: true } },
+            },
+          },
+        },
+        orderBy: { dueDate: 'asc' },
+      }),
+      db.subEvent.findMany({
+        where: { supervisorId: user.id },
+        include: {
+          megaEvent: { select: { title: true, id: true } },
+          tasks: {
+            include: { assignee: { select: { name: true } } },
+            orderBy: { dueDate: 'asc' },
+          },
+        },
+        orderBy: { startsAt: 'asc' },
+      }),
+    ])
 
   const activeRegs = registrations.filter((r) => r.status === 'REGISTERED')
   const pastRegs = registrations.filter((r) => r.status !== 'REGISTERED')
