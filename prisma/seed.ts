@@ -40,7 +40,7 @@ async function main() {
     },
   })
 
-  await db.user.upsert({
+  const president2 = await db.user.upsert({
     where: { email: 'president2@unisphere.test' },
     update: {},
     create: {
