@@ -445,6 +445,61 @@ export async function respondInvitationAction(formData: FormData) {
   }
 }
 
+export async function withdrawVolunteerAction(formData: FormData) {
+  const path = '/student'
+  try {
+    const user = await requireUser('STUDENT')
+    const invitationId = String(formData.get('invitationId') ?? '')
+    const inv = await db.invitation.findUnique({
+      where: { id: invitationId },
+      include: { event: { include: { society: true } } },
+    })
+    if (!inv || inv.studentId !== user.id) throw new HttpError(404)
+    if (inv.status !== 'ACCEPTED')
+      throw new HttpError(400, 'Only accepted volunteer invitations can be withdrawn')
+
+    await db.$transaction([
+      db.invitation.update({
+        where: { id: inv.id },
+        data: { status: 'WITHDRAWN' },
+      }),
+      // Incomplete assigned tasks become unassigned; In Progress tasks reset to To Do
+      db.task.updateMany({
+        where: {
+          eventId: inv.eventId,
+          assigneeId: user.id,
+          status: 'IN_PROGRESS',
+        },
+        data: {
+          status: 'TODO',
+          assigneeId: null,
+        },
+      }),
+      db.task.updateMany({
+        where: {
+          eventId: inv.eventId,
+          assigneeId: user.id,
+          status: 'TODO',
+        },
+        data: {
+          assigneeId: null,
+        },
+      }),
+      // Completed tasks remain associated with that volunteer for history
+    ])
+
+    await notify(
+      inv.event.society.presidentId,
+      'VOLUNTEER_WITHDRAWN',
+      `${user.name} withdrew as a volunteer for "${inv.event.title}". Incomplete tasks were reset.`,
+      `/president/events/${inv.eventId}`
+    )
+    go(path, 'You have withdrawn from volunteering for this event.', true)
+  } catch (e) {
+    handle(e, path)
+  }
+}
+
 async function taskForUpdate(taskId: string, userId: string, role: string) {
   const task = await db.task.findUnique({
     where: { id: taskId },

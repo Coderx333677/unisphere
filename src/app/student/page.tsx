@@ -8,6 +8,7 @@ import {
   cancelRegistrationAction,
   respondInvitationAction,
   updateTaskStatusAction,
+  withdrawVolunteerAction,
 } from '@/app/actions/events'
 import { requestJoinAction } from '@/app/actions/societies'
 import {
@@ -190,6 +191,16 @@ export default async function StudentPage({
                       <input type="hidden" name="decision" value="DECLINED" />
                       <button className="btn btn-danger btn-sm" type="submit">
                         Decline
+                      </button>
+                    </form>
+                  </div>
+                )}
+                {i.status === 'ACCEPTED' && (
+                  <div className="mt-2">
+                    <form action={withdrawVolunteerAction}>
+                      <input type="hidden" name="invitationId" value={i.id} />
+                      <button className="btn btn-secondary btn-sm" type="submit">
+                        Withdraw from volunteering
                       </button>
                     </form>
                   </div>
