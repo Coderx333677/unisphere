@@ -64,6 +64,19 @@ export default async function StudentPage({
   const activeRegs = registrations.filter((r) => r.status === 'REGISTERED')
   const pastRegs = registrations.filter((r) => r.status !== 'REGISTERED')
 
+  const approvedSocietyIds = memberships
+    .filter((m) => m.status === 'APPROVED')
+    .map((m) => m.society.id)
+
+  const meetings =
+    approvedSocietyIds.length > 0
+      ? await db.meeting.findMany({
+          where: { societyId: { in: approvedSocietyIds } },
+          include: { society: { select: { name: true } } },
+          orderBy: { startAt: 'asc' },
+        })
+      : []
+
   return (
     <div className="container-app">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
@@ -252,6 +265,39 @@ export default async function StudentPage({
                         Request again
                       </button>
                     </form>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="card">
+          <h2 className="font-bold text-slate-900">
+            Society Meetings ({meetings.length})
+          </h2>
+          <ul className="mt-2 divide-y divide-slate-100">
+            {meetings.length === 0 && (
+              <li className="py-3 text-sm text-slate-500">
+                No meetings scheduled for your joined societies.
+              </li>
+            )}
+            {meetings.map((m) => (
+              <li key={m.id} className="py-2.5 text-sm">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-semibold text-slate-800">{m.title}</p>
+                    <p className="text-xs text-slate-500">
+                      {m.society.name} · 🕒 {fmtPKT(m.startAt)} · 📍 {m.location}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-600">
+                      <strong>Agenda:</strong> {m.agenda}
+                    </p>
+                  </div>
+                  {m.cancelled ? (
+                    <span className="badge badge-rose">Cancelled</span>
+                  ) : (
+                    <span className="badge badge-emerald">Scheduled</span>
                   )}
                 </div>
               </li>

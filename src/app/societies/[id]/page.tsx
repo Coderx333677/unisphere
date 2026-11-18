@@ -64,10 +64,22 @@ export default async function SocietyDetailPage({
         <div className="lg:col-span-2">
           <div className="card">
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <span className="badge badge-indigo">{society.category}</span>
-                <h1 className="mt-2 text-2xl font-black text-slate-900">
-                  {society.name}
+              <div className="flex items-start gap-4">
+                {society.logoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={society.logoUrl}
+                    alt={society.name}
+                    className="h-16 w-16 rounded-full border border-slate-200 object-cover"
+                  />
+                )}
+                <div>
+                  <span className="badge badge-indigo">{society.category}</span>
+                  <h1 className="mt-1 text-2xl font-black text-slate-900">
+                    {society.name}
+                  </h1>
+                </div>
+              </div>
                 </h1>
               </div>
               {isPresident && (

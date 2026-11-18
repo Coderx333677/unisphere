@@ -1,6 +1,8 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import fs from 'fs'
+import path from 'path'
 import { db } from '@/lib/db'
 import { HttpError, errQS } from '@/lib/errors'
 import { requireUser } from '@/lib/auth'
@@ -13,6 +15,29 @@ const go = (path: string, msg: string, ok = false) =>
 function handle(e: unknown, path: string): never {
   if (e instanceof HttpError) go(path, e.message || `Error ${e.status}`)
   throw e
+}
+
+async function handleLogoUpload(file: unknown): Promise<string | null> {
+  if (!file || typeof file !== 'object' || !('size' in file)) return null
+  const f = file as File
+  if (f.size === 0) return null
+  if (f.size > 2 * 1024 * 1024) {
+    throw new HttpError(400, 'Logo file size exceeds the 2 MB limit')
+  }
+  const bytes = await f.arrayBuffer()
+  const buffer = Buffer.from(bytes)
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true })
+  }
+  const ext = path.extname(f.name) || '.png'
+  const cleanExt = ['.png', '.jpg', '.jpeg', '.webp', '.svg'].includes(ext.toLowerCase())
+    ? ext.toLowerCase()
+    : '.png'
+  const filename = `logo-${Date.now()}-${Math.random().toString(36).substring(2, 8)}${cleanExt}`
+  const filePath = path.join(uploadsDir, filename)
+  fs.writeFileSync(filePath, buffer)
+  return `/uploads/${filename}`
 }
 
 export async function createSocietyAction(formData: FormData) {
@@ -38,7 +63,9 @@ export async function createSocietyAction(formData: FormData) {
     const clash = await db.society.findUnique({ where: { name: i.name } })
     if (clash) throw new HttpError(400, 'A society with this name already exists')
 
-    await db.society.create({ data: { ...i, presidentId: user.id } })
+    const logoUrl = await handleLogoUpload(formData.get('logo'))
+
+    await db.society.create({ data: { ...i, logoUrl, presidentId: user.id } })
     go(path, 'Society created. It is active immediately.', true)
   } catch (e) {
     handle(e, path)
@@ -68,7 +95,10 @@ export async function updateSocietyAction(formData: FormData) {
     if (clash && clash.id !== society.id)
       throw new HttpError(400, 'A society with this name already exists')
 
-    await db.society.update({ where: { id: society.id }, data: i })
+    const logoUrl = await handleLogoUpload(formData.get('logo'))
+    const updateData = logoUrl ? { ...i, logoUrl } : i
+
+    await db.society.update({ where: { id: society.id }, data: updateData })
     go(path, 'Society updated.', true)
   } catch (e) {
     handle(e, path)

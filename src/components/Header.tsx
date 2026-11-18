@@ -9,6 +9,7 @@ const NAV: Record<string, { href: string; label: string }[]> = {
     { href: '/president', label: 'Dashboard' },
     { href: '/president/events', label: 'Events' },
     { href: '/president/members', label: 'Members' },
+    { href: '/president/meetings', label: 'Meetings' },
     { href: '/societies', label: 'Societies' },
   ],
   STUDENT: [

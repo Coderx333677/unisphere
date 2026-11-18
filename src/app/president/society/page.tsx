@@ -37,7 +37,30 @@ export default async function PresidentSocietyPage({
             : 'A society becomes active immediately after creation — no separate administrator approval.'}
         </p>
         <Alerts searchParams={searchParams} />
-        <form action={action} className="card space-y-4">
+        <form action={action} encType="multipart/form-data" className="card space-y-4">
+          <div>
+            <label className="label" htmlFor="logo">
+              Society Logo <span className="text-slate-400">(optional, max 2 MB)</span>
+            </label>
+            {society?.logoUrl && (
+              <div className="mb-2 flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={society.logoUrl}
+                  alt={society.name}
+                  className="h-14 w-14 rounded-full border border-slate-200 object-cover"
+                />
+                <span className="text-xs text-slate-500">Current logo</span>
+              </div>
+            )}
+            <input
+              id="logo"
+              name="logo"
+              type="file"
+              accept="image/*"
+              className="input file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-200"
+            />
+          </div>
           <div>
             <label className="label" htmlFor="name">
               Society name
