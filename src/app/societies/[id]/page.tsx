@@ -80,8 +80,6 @@ export default async function SocietyDetailPage({
                   </h1>
                 </div>
               </div>
-                </h1>
-              </div>
               {isPresident && (
                 <Link href="/president/society" className="btn btn-secondary btn-sm">
                   Manage
