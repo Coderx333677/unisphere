@@ -38,7 +38,11 @@ export default async function AdminDashboardPage({
         },
         orderBy: { startAt: 'asc' },
       }),
-      db.expense.groupBy({ by: ['eventId'], _sum: { amount: true } }),
+      db.expense.groupBy({
+        by: ['eventId'],
+        where: { eventId: { not: null } },
+        _sum: { amount: true },
+      }),
     ])
 
   const spentBy = new Map(

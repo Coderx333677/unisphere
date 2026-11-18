@@ -503,14 +503,29 @@ export async function withdrawVolunteerAction(formData: FormData) {
 async function taskForUpdate(taskId: string, userId: string, role: string) {
   const task = await db.task.findUnique({
     where: { id: taskId },
-    include: { event: { include: { society: true } } },
+    include: {
+      event: { include: { society: true } },
+      subEvent: { include: { megaEvent: true } },
+    },
   })
   if (!task) throw new HttpError(404, 'Task not found')
-  const isPresident =
-    role === 'PRESIDENT' && task.event.society.presidentId === userId
-  const isAssignee = task.assigneeId === userId
-  if (!isPresident && !isAssignee) throw new HttpError(403)
-  return { task, isPresident, isAssignee }
+  if (task.event) {
+    const isPresident =
+      role === 'PRESIDENT' && task.event.society.presidentId === userId
+    const isAssignee = task.assigneeId === userId
+    if (!isPresident && !isAssignee) throw new HttpError(403)
+    return { task, isPresident, isAssignee, isSupervisor: false }
+  }
+  if (task.subEvent) {
+    const isPresident =
+      role === 'PRESIDENT' && task.subEvent.megaEvent.presidentId === userId
+    const isSupervisor =
+      role === 'STUDENT' && task.subEvent.supervisorId === userId
+    const isAssignee = task.assigneeId === userId
+    if (!isPresident && !isSupervisor && !isAssignee) throw new HttpError(403)
+    return { task, isPresident, isAssignee, isSupervisor }
+  }
+  throw new HttpError(400, 'Invalid task')
 }
 
 export async function createTaskAction(formData: FormData) {
@@ -578,7 +593,7 @@ export async function updateTaskStatusAction(formData: FormData) {
   try {
     const user = await requireUser()
     if (!TASK_STATUS.includes(status)) throw new HttpError(400, 'Invalid status')
-    const { task, isPresident, isAssignee } = await taskForUpdate(
+    const { task, isPresident, isAssignee, isSupervisor } = await taskForUpdate(
       taskId,
       user.id,
       user.role
@@ -586,20 +601,37 @@ export async function updateTaskStatusAction(formData: FormData) {
 
     await db.task.update({ where: { id: task.id }, data: { status } })
 
-    if (isAssignee)
-      await notify(
-        task.event.society.presidentId,
-        'TASK_UPDATE',
-        `${user.name} moved "${task.title}" to ${status.replace('_', ' ')}`,
-        `/president/events/${task.eventId}`
-      )
-    if (isPresident && task.assigneeId && task.assigneeId !== user.id)
-      await notify(
-        task.assigneeId,
-        'TASK_UPDATE',
-        `Your task "${task.title}" is now ${status.replace('_', ' ')}`,
-        '/student'
-      )
+    if (task.event) {
+      if (isAssignee)
+        await notify(
+          task.event.society.presidentId,
+          'TASK_UPDATE',
+          `${user.name} moved "${task.title}" to ${status.replace('_', ' ')}`,
+          `/president/events/${task.eventId}`
+        )
+      if (isPresident && task.assigneeId && task.assigneeId !== user.id)
+        await notify(
+          task.assigneeId,
+          'TASK_UPDATE',
+          `Your task "${task.title}" is now ${status.replace('_', ' ')}`,
+          '/student'
+        )
+    } else if (task.subEvent) {
+      if (isAssignee || isSupervisor)
+        await notify(
+          task.subEvent.megaEvent.presidentId,
+          'TASK_UPDATE',
+          `${user.name} moved "${task.title}" to ${status.replace('_', ' ')}`,
+          `/president/mega-events/${task.subEvent.megaEventId}/sub-events/${task.subEvent.id}`
+        )
+      if (isPresident && task.assigneeId && task.assigneeId !== user.id)
+        await notify(
+          task.assigneeId,
+          'TASK_UPDATE',
+          `Your task "${task.title}" is now ${status.replace('_', ' ')}`,
+          '/student'
+        )
+    }
     go(path, 'Task updated.', true)
   } catch (e) {
     handle(e, path)
