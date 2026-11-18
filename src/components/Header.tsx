@@ -7,6 +7,7 @@ import Bell from './Bell'
 const NAV: Record<string, { href: string; label: string }[]> = {
   PRESIDENT: [
     { href: '/president', label: 'Dashboard' },
+    { href: '/president/mega-events', label: 'Mega Events' },
     { href: '/president/events', label: 'Events' },
     { href: '/president/members', label: 'Members' },
     { href: '/president/meetings', label: 'Meetings' },
@@ -19,6 +20,7 @@ const NAV: Record<string, { href: string; label: string }[]> = {
   ],
   ADMIN: [
     { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/mega-events', label: 'Mega Events' },
     { href: '/admin/societies', label: 'Societies' },
     { href: '/admin/monitor', label: 'Monitor' },
   ],

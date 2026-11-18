@@ -20,7 +20,7 @@ export default async function AdminDashboardPage({
   if (!user || user.role !== 'ADMIN') redirect('/login?next=/admin')
 
   const now = new Date()
-  const [societyCount, eventCount, regCount, pending, events, expenses] =
+  const [societyCount, eventCount, regCount, pending, events, expenses, myMegaEvents] =
     await Promise.all([
       db.society.count(),
       db.event.count(),
@@ -42,6 +42,15 @@ export default async function AdminDashboardPage({
         by: ['eventId'],
         where: { eventId: { not: null } },
         _sum: { amount: true },
+      }),
+      db.megaEvent.findMany({
+        where: { createdById: user.id },
+        include: {
+          society: { select: { name: true } },
+          president: { select: { name: true } },
+          _count: { select: { subEvents: true } },
+        },
+        orderBy: { createdAt: 'desc' },
       }),
     ])
 
@@ -75,12 +84,13 @@ export default async function AdminDashboardPage({
       </div>
       <Alerts searchParams={searchParams} />
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-5">
         {[
           { l: 'Societies', v: societyCount },
           { l: 'Events', v: eventCount },
           { l: 'Active registrations', v: regCount },
           { l: 'Pending proposals', v: pending.length },
+          { l: 'My Mega Events', v: myMegaEvents.length },
         ].map((s) => (
           <div key={s.l} className="card">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -89,6 +99,70 @@ export default async function AdminDashboardPage({
             <p className="mt-1 text-3xl font-black text-slate-900">{s.v}</p>
           </div>
         ))}
+      </div>
+
+      {/* Task 2: Mega Events Section */}
+      <div className="card mt-5 border-l-4 border-l-indigo-600">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-slate-900">Mega Events Management</h2>
+            <p className="text-xs text-slate-500">
+              Parent mega events created by you with multi-sub-event allocations.
+            </p>
+          </div>
+          <Link
+            href="/admin/mega-events"
+            className="btn btn-primary btn-sm"
+          >
+            Manage Mega Events →
+          </Link>
+        </div>
+        {myMegaEvents.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No Mega Events created yet.{' '}
+            <Link
+              href="/admin/mega-events"
+              className="text-indigo-600 hover:underline"
+            >
+              Create a Mega Event
+            </Link>
+            .
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table-app">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Society</th>
+                  <th>Assigned President</th>
+                  <th>Budget</th>
+                  <th>Sub-Events</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {myMegaEvents.map((m) => (
+                  <tr key={m.id}>
+                    <td className="font-semibold text-slate-800">{m.title}</td>
+                    <td>{m.society.name}</td>
+                    <td>{m.president.name}</td>
+                    <td className="font-semibold">{money(m.overallBudget)}</td>
+                    <td>{m._count.subEvents} sub-events</td>
+                    <td className="text-right">
+                      <Link
+                        href={`/admin/mega-events/${m.id}`}
+                        className="btn btn-secondary btn-sm"
+                      >
+                        Details
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="card mt-5">

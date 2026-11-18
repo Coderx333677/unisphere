@@ -22,7 +22,11 @@ export default async function AdminMonitorPage() {
       },
       orderBy: { startAt: 'asc' },
     }),
-    db.expense.groupBy({ by: ['eventId'], _sum: { amount: true } }),
+    db.expense.groupBy({
+      by: ['eventId'],
+      where: { eventId: { not: null } },
+      _sum: { amount: true },
+    }),
     db.society.count(),
   ])
   const spentBy = new Map(expenses.map((e) => [e.eventId, e._sum.amount ?? 0]))
