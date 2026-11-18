@@ -392,7 +392,18 @@ export default async function PresidentEventDetailPage({
         {/* EXPENSES */}
         <div className="card">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-slate-900">Expenses</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="font-bold text-slate-900">Expenses</h2>
+              <a
+                href={`/api/events/${ev.id}/report`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary btn-sm text-xs"
+                download
+              >
+                📄 Download PDF Report
+              </a>
+            </div>
             <div className="text-right text-xs text-slate-500">
               <div>
                 approved{' '}
