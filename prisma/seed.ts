@@ -51,6 +51,20 @@ async function main() {
     },
   })
 
+  const nexusSociety = await db.society.upsert({
+    where: { name: 'NEXUS Society' },
+    update: {},
+    create: {
+      name: 'NEXUS Society',
+      description:
+        'Interdisciplinary leadership, innovation and mega events across university departments.',
+      category: 'Academic',
+      contactEmail: 'nexus@unisphere.test',
+      contactPhone: '+92 300 7654321',
+      presidentId: president2.id,
+    },
+  })
+
   const students = [] as { id: string; name: string }[]
   for (let i = 1; i <= 5; i++) {
     const u = await db.user.upsert({
@@ -296,7 +310,7 @@ async function main() {
   console.log('\n────────── Demo credentials ──────────')
   console.log(`ADMIN     admin@unisphere.test      / Admin@12345`)
   console.log(`PRESIDENT president1@unisphere.test / Pass@12345  (owns Tech Society)`)
-  console.log(`PRESIDENT president2@unisphere.test / Pass@12345  (no society yet)`)
+  console.log(`PRESIDENT president2@unisphere.test / Pass@12345  (owns NEXUS Society)`)
   for (let i = 1; i <= 5; i++)
     console.log(`STUDENT   student${i}@unisphere.test / Pass@12345`)
   console.log('──────────────────────────────────────\n')
