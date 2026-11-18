@@ -149,6 +149,11 @@ export default async function AdminEventReviewPage({
           {canApprove || canReject ? (
             <div className="card space-y-4">
               <h2 className="font-bold text-slate-900">Decision</h2>
+              {spent > ev.proposedBudget && (
+                <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-xs text-rose-800">
+                  ⚠️ <strong>Warning (Over Budget):</strong> The revised proposed budget ({money(ev.proposedBudget)}) is lower than expenses already recorded ({money(spent)}). Approving this will set an <em>Over Budget</em> status and block any further expenses.
+                </div>
+              )}
               <form action={decideEventAction} className="space-y-2">
                 <input type="hidden" name="eventId" value={ev.id} />
                 <div>
