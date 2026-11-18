@@ -646,7 +646,7 @@ export async function assignTaskAction(formData: FormData) {
       where: { id: taskId },
       include: { event: true },
     })
-    if (!task) throw new HttpError(404, 'Task not found')
+    if (!task || !task.eventId) throw new HttpError(404, 'Task not found')
     await requireOwnEvent(user, task.eventId)
 
     const assigneeId = String(formData.get('assigneeId') ?? '').trim()
@@ -686,9 +686,9 @@ async function ownExpense(expenseId: string, userId: string) {
     where: { id: expenseId },
     include: { event: { include: { society: true } } },
   })
-  if (!ex) throw new HttpError(404, 'Expense not found')
+  if (!ex || !ex.event || !ex.eventId) throw new HttpError(404, 'Expense not found')
   if (ex.event.society.presidentId !== userId) throw new HttpError(404)
-  return ex
+  return ex as typeof ex & { eventId: string; event: NonNullable<typeof ex.event> }
 }
 
 async function sumExpenses(
