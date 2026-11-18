@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniSphere - Presentation Slides</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .deck-container {
+      width: 100%;
+      max-width: 1050px;
+      aspect-ratio: 16 / 9;
+      background: #1e293b;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .slide {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      padding: 48px 56px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-badge {
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      margin-bottom: 16px;
+      align-self: flex-start;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    h1 {
+      font-size: 2.3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    p.lead {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: auto;
+    }
+    .card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      color: #38bdf8;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .flow-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 0.9rem;
+    }
+    .flow-card .num {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #818cf8;
+      margin-bottom: 6px;
+    }
+    .flow-card strong { color: #f1f5f9; display: block; margin-bottom: 4px; }
+    .flow-card span { color: #94a3b8; font-size: 0.85rem; }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 36px;
+      background: #0f172a;
+      border-top: 1px solid #334155;
+    }
+    .btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+    .indicator { color: #94a3b8; font-size: 0.9rem; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <div class="deck-container">
+    
+    <!-- Slide 1: Problem -->
+    <div class="slide active" id="slide-1">
+      <div class="slide-badge">Slide 1 of 4 • Problem Statement</div>
+      <h1>Campus Coordination Is Fragmented</h1>
+      <p class="lead">University student organizations struggle with chaotic, manual workflows that hurt student engagement and administrative compliance.</p>
+      
+      <div class="grid">
+        <div class="card">
+          <h3>📋 Disconnected Spreadsheets</h3>
+          <p>Presidents manage event details, volunteer lists, task assignments, and budget spreadsheets across scattered chat groups and shared drives.</p>
+        </div>
+        <div class="card">
+          <h3>📢 Lost Student Opportunities</h3>
+          <p>Students regularly miss announcements or face clumsy registration links with zero real-time seat tracking and no visibility into volunteer tasks.</p>
+        </div>
+        <div class="card">
+          <h3>⏳ Blind Administration</h3>
+          <p>University admin lacks oversight of campus activities, handling financial approvals and event compliance through delayed email threads.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Solution -->
+    <div class="slide" id="slide-2">
+      <div class="slide-badge">Slide 2 of 4 • Solution Architecture</div>
+      <h1>UniSphere: One Unified Platform, 3 Connected Roles</h1>
+      <p class="lead">An end-to-end digital lifecycle connecting Presidents, Students, and Administrators seamlessly.</p>
+      
+      <div class="flow-steps">
+        <div class="flow-card">
+          <div class="num">01</div>
+          <strong>Secure Onboarding</strong>
+          <span>Signup & 2-step email OTP with auto-preserved destinations.</span>
+        </div>
+        <div class="flow-card">
+          <div class="num">02</div>
+          <strong>Society & Proposals</strong>
+          <span>President creates society & drafts events with strict PKT timezone validation.</span>
+        </div>
+        <div class="flow-card">
+          <div class="num">03</div>
+          <strong>Admin Governance</strong>
+          <span>Combined event & budget review with approval remarks.</span>
+        </div>
+        <div class="flow-card">
+          <div class="num">04</div>
+          <strong>Execution & Control</strong>
+          <span>Atomic registration, Kanban task tracking, & hard-capped expense ledger.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Key Functionality & Tech -->
+    <div class="slide" id="slide-3">
+      <div class="slide-badge">Slide 3 of 4 • Tech & Engineering Highlights</div>
+      <h1>Engineered for Robustness & Zero Race Conditions</h1>
+      <p class="lead">Built on modern Next.js 14 App Router with SQLite and Prisma for maximum speed and simplicity.</p>
+      
+      <div class="grid">
+        <div class="card">
+          <h3>⚡ Atomic Concurrency</h3>
+          <p>Direct SQL atomic counter updates (<code>WHERE regCount < capacity</code>) prevent overselling under high simultaneous student load.</p>
+        </div>
+        <div class="card">
+          <h3>🔒 Strict Governance</h3>
+          <p>Pure-function state machines enforce event lifecycle transitions, hard expense caps, and role-based path protection.</p>
+        </div>
+        <div class="card">
+          <h3>📡 Real-Time SSE Stream</h3>
+          <p>Server-Sent Events instantly update public seat counts and deliver in-app notification toasts without manual page refresh.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Demo & What's Next -->
+    <div class="slide" id="slide-4">
+      <div class="slide-badge">Slide 4 of 4 • Demo & Future Roadmap</div>
+      <h1>Live MVP Demo & What's Next</h1>
+      <p class="lead">Fully compliant MVP passing all core smoke tests, with clean extensible architecture.</p>
+      
+      <div class="grid">
+        <div class="card">
+          <h3>✨ Delivered & Verified</h3>
+          <p>• Console OTP authentication<br>• Society & event lifecycle<br>• Public registration return flow<br>• Volunteer Kanban & progress %<br>• Hard expense cap</p>
+        </div>
+        <div class="card">
+          <h3>🎯 4-Minute Live Demo</h3>
+          <p>1. President submits event proposal.<br>2. Admin approves event & budget live.<br>3. Student registers (seats update via SSE).<br>4. Volunteer marks task done; expense cap test.</p>
+        </div>
+        <div class="card">
+          <h3>🚀 Next Iterations</h3>
+          <p>• Production SMTP email integration<br>• PDF expense report generation<br>• Society meeting scheduling<br>• Multi-campus cloud deployment</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="prevSlide()" disabled>← Previous</button>
+      <div class="indicator" id="slideIndicator">Slide 1 of 4</div>
+      <button class="btn" id="nextBtn" onclick="nextSlide()">Next →</button>
+    </div>
+
+  </div>
+
+  <script>
+    let current = 1;
+    const total = 4;
+
+    function showSlide(n) {
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      const active = document.getElementById('slide-' + n);
+      if (active) active.classList.add('active');
+      document.getElementById('slideIndicator').innerText = `Slide ${n} of ${total}`;
+      document.getElementById('prevBtn').disabled = (n === 1);
+      document.getElementById('nextBtn').disabled = (n === total);
+    }
+
+    function nextSlide() {
+      if (current < total) { current++; showSlide(current); }
+    }
+
+    function prevSlide() {
+      if (current > 1) { current--; showSlide(current); }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>
