@@ -343,13 +343,27 @@ export default async function StudentPage({
                   <div>
                     <p className="font-medium text-slate-800">{t.title}</p>
                     <p className="text-xs text-slate-500">
-                      <Link
-                        href={`/events/${t.eventId}`}
-                        className="hover:text-indigo-600"
-                      >
-                        {t.event.title}
-                      </Link>{' '}
-                      · due {fmtPKT(t.dueDate)}
+                      {t.event ? (
+                        <>
+                          <Link
+                            href={`/events/${t.eventId}`}
+                            className="hover:text-indigo-600 font-medium"
+                          >
+                            {t.event.title}
+                          </Link>{' '}
+                          · due {fmtPKT(t.dueDate)}
+                        </>
+                      ) : t.subEvent ? (
+                        <>
+                          <span className="font-semibold text-indigo-700">
+                            Sub-Event: {t.subEvent.title}
+                          </span>{' '}
+                          <span className="text-slate-400">({t.subEvent.megaEvent.title})</span>{' '}
+                          · due {fmtPKT(t.dueDate)}
+                        </>
+                      ) : (
+                        `due ${fmtPKT(t.dueDate)}`
+                      )}
                     </p>
                   </div>
                   <TaskBadge s={t.status} />
@@ -363,7 +377,7 @@ export default async function StudentPage({
                         <input type="hidden" name="status" value={s} />
                         <input type="hidden" name="back" value="/student" />
                         <button className="btn btn-secondary btn-sm" type="submit">
-                          → {s.replace('_', ' ')}
+                          → {s === 'TODO' ? 'To Do' : s === 'IN_PROGRESS' ? 'In Progress' : 'Completed'}
                         </button>
                       </form>
                     ))}
@@ -373,6 +387,173 @@ export default async function StudentPage({
           </ul>
         </div>
       </div>
+
+      {/* Task 2: My Supervised Sub-events Section */}
+      {supervisedSubEvents.length > 0 && (
+        <div className="mt-6">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-slate-900">
+                My Supervised Sub-events ({supervisedSubEvents.length})
+              </h2>
+              <p className="text-xs text-slate-500">
+                Sub-events assigned to you as supervisor. You can manage all task statuses in your assigned sub-events.
+              </p>
+            </div>
+            <span className="badge badge-emerald">Supervisor Access</span>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {supervisedSubEvents.map((sub) => {
+              const progressPct = calculateSubEventProgress(sub.tasks)
+              const completedCount = sub.tasks.filter(
+                (t) => t.status === 'COMPLETED'
+              ).length
+
+              return (
+                <div key={sub.id} className="card border-l-4 border-l-emerald-600">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="badge badge-indigo text-[10px]">
+                        {sub.megaEvent.title}
+                      </span>
+                      <h3 className="mt-1 text-lg font-bold text-slate-900">
+                        {sub.title}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        📍 {sub.venue} · 🕒 {fmtPKT(sub.startsAt)}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-xs font-bold text-emerald-600">
+                        {progressPct}% Done
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        {completedCount}/{sub.tasks.length} tasks
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full bg-emerald-500 transition-all"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+
+                  {/* Sub-event Preparation Task Checklist */}
+                  <div className="mt-4 border-t border-slate-100 pt-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                      Sub-Event Tasks ({sub.tasks.length})
+                    </p>
+
+                    {sub.tasks.length === 0 ? (
+                      <p className="mt-2 text-xs text-slate-400 italic">
+                        No tasks assigned to this sub-event yet.
+                      </p>
+                    ) : (
+                      <ul className="mt-2 space-y-2">
+                        {sub.tasks.map((task) => {
+                          const isDone = task.status === 'COMPLETED'
+                          const isInProg = task.status === 'IN_PROGRESS'
+
+                          return (
+                            <li
+                              key={task.id}
+                              className={`rounded-lg border p-2.5 text-xs transition-colors ${
+                                isDone
+                                  ? 'border-emerald-200 bg-emerald-50/30'
+                                  : 'border-slate-200 bg-white'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-start gap-2">
+                                  <span className="mt-0.5 text-xs font-bold">
+                                    {isDone ? (
+                                      <span className="text-emerald-600">✓</span>
+                                    ) : isInProg ? (
+                                      <span className="text-indigo-600">◐</span>
+                                    ) : (
+                                      <span className="text-slate-400">○</span>
+                                    )}
+                                  </span>
+                                  <div>
+                                    <p
+                                      className={`font-semibold ${
+                                        isDone
+                                          ? 'text-slate-500 line-through'
+                                          : 'text-slate-800'
+                                      }`}
+                                    >
+                                      {task.title}
+                                    </p>
+                                    <p className="mt-0.5 text-[11px] text-slate-400">
+                                      Assignee:{' '}
+                                      <span className="font-medium text-slate-600">
+                                        {task.assignee?.name || 'Unassigned'}
+                                      </span>{' '}
+                                      · Due {fmtPKT(task.dueDate)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <TaskBadge s={task.status} />
+                              </div>
+
+                              {/* Supervisor Status Update Buttons */}
+                              <div className="mt-2 flex items-center justify-end gap-1 border-t border-slate-100 pt-1.5">
+                                {(
+                                  ['TODO', 'IN_PROGRESS', 'COMPLETED'] as const
+                                )
+                                  .filter((s) => s !== task.status)
+                                  .map((s) => (
+                                    <form
+                                      key={s}
+                                      action={updateTaskStatusAction}
+                                      className="inline"
+                                    >
+                                      <input
+                                        type="hidden"
+                                        name="taskId"
+                                        value={task.id}
+                                      />
+                                      <input
+                                        type="hidden"
+                                        name="status"
+                                        value={s}
+                                      />
+                                      <input
+                                        type="hidden"
+                                        name="back"
+                                        value="/student"
+                                      />
+                                      <button
+                                        type="submit"
+                                        className="btn btn-secondary btn-sm text-[10px] py-0.5 px-2"
+                                      >
+                                        →{' '}
+                                        {s === 'TODO'
+                                          ? 'To Do'
+                                          : s === 'IN_PROGRESS'
+                                          ? 'In Progress'
+                                          : 'Completed'}
+                                      </button>
+                                    </form>
+                                  ))}
+                              </div>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
