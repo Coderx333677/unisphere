@@ -42,6 +42,15 @@ UniSphere is a centralized web platform designed for universities to streamline 
 - Server-Sent Events (SSE) streaming live remaining seats to public pages and immediate notifications.
 - In-app notification center with unread badge counter and real-time toast alerts.
 
+### 🌟 Completed Bonus Tasks
+- **Bonus A — Downloadable PDF Expense Report**: Built with `pdfkit` at `/api/events/[id]/report` with instant PDF export.
+- **Bonus B — Society Logo Upload**: Organizers can upload society logos (enforced ≤ 2 MB file check) saved to `/public/uploads`.
+- **Bonus C — Member / Core Member Labels**: Presidents can label approved society members as either `Member` or `Core Member`.
+- **Bonus D — Volunteer Withdrawal & Task Reset**: Accepted volunteers can withdraw; in-progress tasks reset to `TODO` and unassign, while completed tasks stay associated for history.
+- **Bonus E — Budget Reapproval & Over-Budget Warning**: System alerts admins when revised budget is lower than recorded expenses and displays the `Over budget` badge with negative balance.
+- **Bonus F — Cancellation Notifications**: Real-time cancellation broadcasts sent to all registered attendees and volunteers.
+- **Bonus G — Meeting Management**: Presidents can schedule meetings with PKT datetime, venue, and agenda; approved members are automatically notified and can view meetings in their student dashboard.
+
 ---
 
 ## 🛠 Tech Stack
