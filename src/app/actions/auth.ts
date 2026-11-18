@@ -9,6 +9,7 @@ import {
   createSessionCookie,
   clearAuthCookies,
   getPreAuth,
+  type SessionUser,
 } from '@/lib/auth'
 import { issueOtp, verifyOtp } from '@/lib/otp'
 import {
@@ -18,8 +19,9 @@ import {
   validateSignup,
 } from '@/lib/validate'
 
-function fail(path: string, msg: string, extra: Record<string, string> = {}) {
+function fail(path: string, msg: string, extra: Record<string, string> = {}): never {
   redirect(`${path}?${errQS(msg, extra)}`)
+  throw new Error('unreachable')
 }
 
 export async function signupAction(formData: FormData) {
@@ -78,7 +80,7 @@ export async function verifyStepAction(formData: FormData) {
   const user = await db.user.findUnique({ where: { id: pre!.userId } })
   if (!user) fail('/login', 'Account not found.')
 
-  await createSessionCookie(user)
+  await createSessionCookie(user as SessionUser)
   redirect(sanitizeNext(pre!.next) ?? roleHome(user.role))
 }
 
